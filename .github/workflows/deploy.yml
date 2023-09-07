@@ -35,6 +35,28 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
+            az deployment group create --what-if --resource-group RG-BICEP --template-file $GITHUB_WORKSPACE/src/bicep/storage_account.bicep
+
+  deploy:
+    needs: [build]
+    # The type of runner that the job will run on
+    environment: prd
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
+      - name: Azure Login
+        uses: Azure/login@v1.4.6
+        with:
+          # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+          creds: ${{ secrets.AZURE_SPN_CREDENTIAL }}
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
             az deployment group create --resource-group RG-BICEP --template-file $GITHUB_WORKSPACE/src/bicep/storage_account.bicep
 
-     
